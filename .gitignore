@@ -1,0 +1,17 @@
+*.bak
+*.bak_*
+*.tmp
+*.old
+*.log
+*.tar.gz
+*.pyc
+__pycache__/
+config.json
+.env
+*.env
+token*
+TOKEN*
+/etc/adm-lite/userDIR/*
+!/etc/adm-lite/userDIR/.gitkeep
+/etc/adm-lite/userDIR_eliminados/*
+!/etc/adm-lite/userDIR_eliminados/.gitkeep
