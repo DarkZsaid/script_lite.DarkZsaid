@@ -96,6 +96,37 @@ chmod +x /usr/local/bin/darkzsaid_quota_check.sh
 
 ok "Control de consumo instalado"
 
+
+paso "Instalando Server Message real"
+mkdir -p /usr/local/bin
+
+cp -f usr/local/bin/darkzsaid_pam_banner.sh /usr/local/bin/darkzsaid_pam_banner.sh
+cp -f usr/local/bin/darkzsaid_banner.sh /usr/local/bin/darkzsaid_banner.sh
+cp -f usr/local/bin/darkzsaid_quota_check.sh /usr/local/bin/darkzsaid_quota_check.sh
+
+chmod +x /usr/local/bin/darkzsaid_pam_banner.sh
+chmod +x /usr/local/bin/darkzsaid_banner.sh
+chmod +x /usr/local/bin/darkzsaid_quota_check.sh
+
+# Limpiar intentos viejos del banner
+sed -i '/# DARKZSAID_AUTH_BANNER_BEGIN/,/# DARKZSAID_AUTH_BANNER_END/d' /etc/pam.d/sshd 2>/dev/null || true
+sed -i '/darkzsaid_pam_banner.sh/d' /etc/pam.d/sshd 2>/dev/null || true
+sed -i '/banner_auth.sh/d' /etc/pam.d/sshd 2>/dev/null || true
+
+# Activar banner real por PAM
+sed -i 's/^#\?UsePAM .*/UsePAM yes/' /etc/ssh/sshd_config 2>/dev/null || true
+grep -q '^UsePAM yes' /etc/ssh/sshd_config || echo 'UsePAM yes' >> /etc/ssh/sshd_config
+
+cat >> /etc/pam.d/sshd <<'PAMBANNER'
+
+# DARKZSAID_AUTH_BANNER_BEGIN
+account optional pam_exec.so stdout /usr/local/bin/darkzsaid_pam_banner.sh
+session optional pam_exec.so stdout /usr/local/bin/darkzsaid_pam_banner.sh
+# DARKZSAID_AUTH_BANNER_END
+PAMBANNER
+
+ok "Server Message instalado"
+
 paso "Instalando bot Telegram"
 rm -rf /opt/darkzsaid-lite-bot
 mkdir -p /opt/darkzsaid-lite-bot
