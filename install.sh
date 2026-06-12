@@ -87,6 +87,15 @@ grep -q '^ENABLED=1' /etc/default/stunnel4 2>/dev/null || echo 'ENABLED=1' >> /e
 systemctl enable stunnel4 >>"$LOG" 2>&1 || true
 ok "SSL 443 configurado"
 
+
+paso "Instalando control de consumo y Server Message"
+mkdir -p /usr/local/bin
+
+cp -f usr/local/bin/darkzsaid_quota_check.sh /usr/local/bin/darkzsaid_quota_check.sh
+chmod +x /usr/local/bin/darkzsaid_quota_check.sh
+
+ok "Control de consumo instalado"
+
 paso "Instalando bot Telegram"
 rm -rf /opt/darkzsaid-lite-bot
 mkdir -p /opt/darkzsaid-lite-bot
