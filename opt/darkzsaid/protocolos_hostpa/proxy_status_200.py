@@ -17,7 +17,7 @@ SSH_HOST = '127.0.0.1'
 def get_target_ssh(listen_port):
     # MAPEO DARKZSAID SSH WS PURO
     # 90, 8080, 8082 -> OpenSSH 22
-    # 80, 8084, 8086 -> OpenSSH 22
+    # 80, 8084, 8086 -> Dropbear 109
     if listen_port in [90, 8080, 8082]:
         return 22
     elif listen_port in [80, 8084, 8086]:

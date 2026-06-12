@@ -33,7 +33,7 @@ echo
 
 paso "Instalando dependencias"
 apt update -y >>"$LOG" 2>&1
-apt install -y python3 python3-pip python3-venv openssh-server stunnel4 openssl curl wget git net-tools iproute2 iptables >>"$LOG" 2>&1
+apt install -y python3 python3-pip python3-venv openssh-server dropbear stunnel4 openssl curl wget git net-tools iproute2 iptables >>"$LOG" 2>&1
 ok "Dependencias instaladas"
 
 paso "Instalando panelito"
@@ -60,6 +60,24 @@ sed -i 's/^#\?PrintLastLog .*/PrintLastLog no/' /etc/ssh/sshd_config 2>/dev/null
 grep -q '^PrintMotd no' /etc/ssh/sshd_config || echo 'PrintMotd no' >> /etc/ssh/sshd_config
 grep -q '^PrintLastLog no' /etc/ssh/sshd_config || echo 'PrintLastLog no' >> /etc/ssh/sshd_config
 ok "Banner SSH instalado"
+
+
+paso "Configurando Dropbear 109"
+mkdir -p /etc/dropbear
+
+# Ubuntu/Debian usan /etc/default/dropbear
+cat > /etc/default/dropbear <<'DROPBEARCONF'
+NO_START=0
+DROPBEAR_PORT=109
+DROPBEAR_EXTRA_ARGS="-p 109"
+DROPBEAR_BANNER=""
+DROPBEAR_RECEIVE_WINDOW=65536
+DROPBEARCONF
+
+systemctl enable dropbear >>"$LOG" 2>&1 || true
+systemctl restart dropbear >>"$LOG" 2>&1 || true
+
+ok "Dropbear 109 configurado"
 
 paso "Configurando SSL 443 hacia WS 80"
 mkdir -p /etc/stunnel

@@ -25,24 +25,26 @@ fila() {
     local estado
     estado="$(estado_puerto "$puerto")"
 
-    printf "${DORADO}%-8s${RESET} ${BLANCO}%-13s${RESET} ${NARANJA}%-21s${RESET} %b\n" \
+    printf "${DORADO}%-8s${RESET} ${BLANCO}%-13s${RESET} ${NARANJA}%-24s${RESET} %b\n" \
         "$puerto" "$servicio" "$destino" "$estado"
 }
 
 clear
 echo -e "${CYAN}✦ ESTADO PREMIUM DE PUERTOS ✦${RESET}"
-echo -e "${CYAN}────────────────────────────────────────────${RESET}"
-printf "${AZUL}%-8s %-13s %-21s %-8s${RESET}\n" "PUERTO" "SERVICIO" "DESTINO" "ESTADO"
-echo -e "${CYAN}────────────────────────────────────────────${RESET}"
+echo -e "${CYAN}──────────────────────────────────────────────${RESET}"
+printf "${AZUL}%-8s %-13s %-24s %-8s${RESET}\n" "PUERTO" "SERVICIO" "DESTINO" "ESTADO"
+echo -e "${CYAN}──────────────────────────────────────────────${RESET}"
 
 fila "22"   "OpenSSH"     "SSH directo"
+fila "109"  "Dropbear"    "Dropbear directo"
 fila "443"  "SSL/Stunnel" "443 -> WS 80"
-fila "80"   "WS SSH"      "80 -> SSH 22"
-fila "90"   "WS SSH"      "90 -> SSH 22"
-fila "8080" "WS SSH"      "8080 -> SSH 22"
-fila "8082" "WS SSH"      "8082 -> SSH 22"
-fila "8084" "WS SSH"      "8084 -> SSH 22"
-fila "8086" "WS SSH"      "8086 -> SSH 22"
+fila "80"   "WS SSH"      "80 -> Dropbear 109"
+fila "8084" "WS SSH"      "8084 -> Dropbear 109"
+fila "8086" "WS SSH"      "8086 -> Dropbear 109"
+fila "90"   "WS SSH"      "90 -> OpenSSH 22"
+fila "8080" "WS SSH"      "8080 -> OpenSSH 22"
+fila "8082" "WS SSH"      "8082 -> OpenSSH 22"
 
-echo -e "${CYAN}────────────────────────────────────────────${RESET}"
+echo -e "${CYAN}──────────────────────────────────────────────${RESET}"
 echo
+read -rp "Presiona ENTER para continuar..."
