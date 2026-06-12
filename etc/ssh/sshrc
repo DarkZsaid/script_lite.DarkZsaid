@@ -1,2 +1,5 @@
 #!/usr/bin/env bash
-[ -x /usr/local/bin/darkzsaid_banner.sh ] && /usr/local/bin/darkzsaid_banner.sh 2>/dev/null || true
+if [ -x /opt/darkzsaid/menus/banner_conexion.sh ]; then
+    /opt/darkzsaid/menus/banner_conexion.sh 2>/dev/null || true
+fi
+exit 0
