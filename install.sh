@@ -88,14 +88,6 @@ systemctl enable stunnel4 >>"$LOG" 2>&1 || true
 ok "SSL 443 configurado"
 
 
-paso "Instalando control de consumo y Server Message"
-mkdir -p /usr/local/bin
-
-cp -f usr/local/bin/darkzsaid_quota_check.sh /usr/local/bin/darkzsaid_quota_check.sh
-chmod +x /usr/local/bin/darkzsaid_quota_check.sh
-
-ok "Control de consumo instalado"
-
 
 paso "Instalando Server Message real"
 mkdir -p /usr/local/bin
@@ -108,24 +100,49 @@ chmod +x /usr/local/bin/darkzsaid_pam_banner.sh
 chmod +x /usr/local/bin/darkzsaid_banner.sh
 chmod +x /usr/local/bin/darkzsaid_quota_check.sh
 
-# Limpiar intentos viejos del banner
+# Limpiar pruebas viejas del banner
+rm -f /usr/local/bin/darkzsaid_pam_test.sh /usr/local/bin/darkzsaid_generate_message.sh 2>/dev/null || true
+
+# Limpiar intentos anteriores en PAM
 sed -i '/# DARKZSAID_AUTH_BANNER_BEGIN/,/# DARKZSAID_AUTH_BANNER_END/d' /etc/pam.d/sshd 2>/dev/null || true
 sed -i '/darkzsaid_pam_banner.sh/d' /etc/pam.d/sshd 2>/dev/null || true
+sed -i '/darkzsaid_pam_test.sh/d' /etc/pam.d/sshd 2>/dev/null || true
+sed -i '/darkzsaid_generate_message.sh/d' /etc/pam.d/sshd 2>/dev/null || true
 sed -i '/banner_auth.sh/d' /etc/pam.d/sshd 2>/dev/null || true
 
-# Activar banner real por PAM
+# Dejar PAM igual que la VPS buena Ubuntu 24:
+# @include common-account
+# account optional pam_exec.so stdout /usr/local/bin/darkzsaid_pam_banner.sh
+# @include common-session
+python3 - <<'PAMPY'
+from pathlib import Path
+
+pam = Path("/etc/pam.d/sshd")
+txt = pam.read_text()
+
+linea = "account optional pam_exec.so stdout /usr/local/bin/darkzsaid_pam_banner.sh"
+
+if linea not in txt:
+    if "@include common-account" not in txt:
+        raise SystemExit("ERROR: no encontré @include common-account en /etc/pam.d/sshd")
+    txt = txt.replace("@include common-account", "@include common-account\n" + linea, 1)
+
+pam.write_text(txt)
+PAMPY
+
+# SSH igual que la VPS buena
 sed -i 's/^#\?UsePAM .*/UsePAM yes/' /etc/ssh/sshd_config 2>/dev/null || true
+sed -i 's/^#\?PrintMotd .*/PrintMotd no/' /etc/ssh/sshd_config 2>/dev/null || true
+sed -i 's/^#\?PrintLastLog .*/PrintLastLog yes/' /etc/ssh/sshd_config 2>/dev/null || true
+sed -i 's/^#\?Banner .*/Banner none/' /etc/ssh/sshd_config 2>/dev/null || true
+
 grep -q '^UsePAM yes' /etc/ssh/sshd_config || echo 'UsePAM yes' >> /etc/ssh/sshd_config
+grep -q '^PrintMotd no' /etc/ssh/sshd_config || echo 'PrintMotd no' >> /etc/ssh/sshd_config
+grep -q '^PrintLastLog yes' /etc/ssh/sshd_config || echo 'PrintLastLog yes' >> /etc/ssh/sshd_config
+grep -q '^Banner none' /etc/ssh/sshd_config || echo 'Banner none' >> /etc/ssh/sshd_config
 
-cat >> /etc/pam.d/sshd <<'PAMBANNER'
-
-# DARKZSAID_AUTH_BANNER_BEGIN
-account optional pam_exec.so stdout /usr/local/bin/darkzsaid_pam_banner.sh
-session optional pam_exec.so stdout /usr/local/bin/darkzsaid_pam_banner.sh
-# DARKZSAID_AUTH_BANNER_END
-PAMBANNER
-
-ok "Server Message instalado"
+ok "Server Message real instalado"
+echo
 
 paso "Instalando bot Telegram"
 rm -rf /opt/darkzsaid-lite-bot
